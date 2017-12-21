@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 10;
-double dt = 0.1;
+size_t N = 12;
+double dt = 0.15;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -21,7 +21,7 @@ double dt = 0.1;
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 
-double ref_v = 40;
+double ref_v = 100;
 
 size_t x_start = 0;
 size_t y_start = x_start + N;
@@ -53,21 +53,21 @@ class FG_eval {
 
     // The part of the cost based on the reference state.
     for (int t = 0; t < N; t++) {
-      fg[0] += 2000*CppAD::pow(vars[cte_start + t], 2); // * 2000
-      fg[0] += 2000*CppAD::pow(vars[epsi_start + t], 2); // * 2000
-      fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2); // * 1
+      fg[0] += 1000*CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += 2000*CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     // Minimize the use of actuators.
     for (int t = 0; t < N - 1; t++) {
-      fg[0] += 5*CppAD::pow(vars[delta_start + t], 2); // * 5
-      fg[0] += 5*CppAD::pow(vars[a_start + t], 2); // * 5
+      fg[0] += 5*CppAD::pow(vars[delta_start + t], 2);
+      fg[0] += 5*CppAD::pow(vars[a_start + t], 2);
     }
 
     // Minimize the value gap between sequential actuations.
     for (int t = 0; t < N - 2; t++) {
-      fg[0] += 200*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2); // * 200
-      fg[0] += 10*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2); // * 10
+      fg[0] += 200*CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 10*CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }
 
     fg[1 + x_start] = vars[x_start];
@@ -132,7 +132,6 @@ MPC::~MPC() {}
 
 vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   bool ok = true;
-  size_t i;
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   double x = state[0];
@@ -269,10 +268,6 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   //
   // {...} is shorthand for creating a vector, so auto x1 = {1.0,2.0}
   // creates a 2 element double vector.
-  // return {solution.x[x_start + 1],   solution.x[y_start + 1],
-  //         solution.x[psi_start + 1], solution.x[v_start + 1],
-  //         solution.x[cte_start + 1], solution.x[epsi_start + 1],
-  //         solution.x[delta_start],   solution.x[a_start]};
 
   vector<double>result;
 
